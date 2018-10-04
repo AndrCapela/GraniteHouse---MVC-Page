@@ -75,5 +75,21 @@ namespace GraniteHouse.Areas.Admin.Controllers
             }
             return View(producttypes);
         }
+
+        //Get Details Action Method
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var ProductType = await _db.ProductTypes.FindAsync(id);
+            if (ProductType == null)
+            {
+                return NotFound();
+            }
+
+            return View(ProductType);
+        }
     }
 }
