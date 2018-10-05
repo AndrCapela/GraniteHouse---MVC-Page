@@ -12,7 +12,7 @@ namespace GraniteHouse.Models
         public int Id { get; set; }
 
         public String Name { get; set; }
-
+        [DataType(DataType.Currency)]
         public double Price { get; set; }
 
         public bool Avaliable { get; set; }
