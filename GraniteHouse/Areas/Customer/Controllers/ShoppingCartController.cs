@@ -72,9 +72,9 @@ namespace GraniteHouse.Areas.Customer.Controllers
             listCartItems = new List<int>();
             HttpContext.Session.Set("ssShoppingCart", listCartItems);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("AppointmentConfirmation", "ShoppingCart", appointmentId);
         }
-
+        
         public IActionResult Remove(int id)
         {
             List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
@@ -88,6 +88,18 @@ namespace GraniteHouse.Areas.Customer.Controllers
             HttpContext.Session.Set("ssShoppingCart", listCartItems);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult AppointmentConfirmation(int id)
+        {
+            ShoppingCartVM.Appointments = _db.Appointments.Where(a => a.Id == id).FirstOrDefault();
+            List<ProductsSelectedForAppointment> objProdList = _db.ProductsSelectedForAppointment.Where(p => p.AppointmentId == id).ToList();
+
+            foreach(ProductsSelectedForAppointment prodAptObj in objProdList)
+            {
+                ShoppingCartVM.Products.Add(_db.Products.Include(p => p.ProductTypes).Include(p => p.SpecialTags).Where(p => p.Id == prodAptObj.ProductId).FirstOrDefault());
+            }
+            return View(ShoppingCartVM);
         }
     }
 }
