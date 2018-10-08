@@ -21,11 +21,11 @@ namespace GraniteHouse.Models
         [Required(ErrorMessage = "{0} required!")]
         public string CustomerName { get; set; }
 
-        [Required(ErrorMessage = "Filed is mandatory!")]
+        [Required(ErrorMessage = "{0} field is mandatory!")]
         public string CustomerPhoneNumber { get; set; }
 
-        [Required(ErrorMessage = "Filed is mandatory!")]
-        [EmailAddress(ErrorMessage = "Email not valid!")]
+        [Required(ErrorMessage = "{0} field is mandatory!")]
+        [EmailAddress(ErrorMessage = "E-mail not valid!")]
         public string CustomerEmail { get; set; }
 
         public bool isConfirmed { get; set; }

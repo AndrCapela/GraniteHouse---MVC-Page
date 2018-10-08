@@ -43,60 +43,60 @@ namespace GraniteHouse.Areas.Customer.Controllers
 
             return View(ShoppingCartVM);
         }
-        [HttpPost, ActionName("Index")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
+        [ActionName("Index")]
         public IActionResult IndexPost()
         {
-            if (ModelState.IsValid)
+            List<int> lstCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+
+            ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
+                                                            .AddHours(ShoppingCartVM.Appointments.AppointmentTime.Hour)
+                                                            .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
+
+            Appointments appointments = ShoppingCartVM.Appointments;
+            _db.Appointments.Add(appointments);
+            _db.SaveChanges();
+
+            int appointmentId = appointments.Id;
+
+            foreach (int productId in lstCartItems)
             {
-                List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
-
-                ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
-                    .AddHours(ShoppingCartVM.Appointments.AppointmentTime.Hour)
-                    .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
-
-                Appointments appointments = ShoppingCartVM.Appointments;
-                _db.Appointments.Add(appointments);
-                _db.SaveChanges();
-
-                int appointmentId = appointments.Id;
-
-                foreach (int productId in listCartItems)
+                ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
                 {
-                    ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
-                    {
-                        AppointmentId = appointments.Id,
-                        ProductId = productId
-                    };
-                    _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
-                }
-                _db.SaveChanges();
-                listCartItems = new List<int>();
-                HttpContext.Session.Set("ssShoppingCart", listCartItems);
+                    AppointmentId = appointmentId,
+                    ProductId = productId
+                };
+                _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
 
-                return RedirectToAction("AppointmentConfirmation", "ShoppingCart", appointmentId);
             }
-            else
-            {
-                return View(ShoppingCartVM);
-            }
+            _db.SaveChanges();
+            lstCartItems = new List<int>();
+            HttpContext.Session.Set("ssShoppingCart", lstCartItems);
+
+            return RedirectToAction("AppointmentConfirmation", "ShoppingCart", new { Id = appointmentId });
+
         }
 
         public IActionResult Remove(int id)
         {
-            List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
-            if (listCartItems != null && listCartItems.Count > 0)
+            List<int> lstCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+
+            if (lstCartItems.Count > 0)
             {
-                if (listCartItems.Contains(id))
+                if (lstCartItems.Contains(id))
                 {
-                    listCartItems.Remove(id);
+                    lstCartItems.Remove(id);
                 }
             }
-            HttpContext.Session.Set("ssShoppingCart", listCartItems);
+
+            HttpContext.Session.Set("ssShoppingCart", lstCartItems);
 
             return RedirectToAction(nameof(Index));
         }
 
+
+        //Get
         public IActionResult AppointmentConfirmation(int id)
         {
             ShoppingCartVM.Appointments = _db.Appointments.Where(a => a.Id == id).FirstOrDefault();
@@ -106,7 +106,9 @@ namespace GraniteHouse.Areas.Customer.Controllers
             {
                 ShoppingCartVM.Products.Add(_db.Products.Include(p => p.ProductTypes).Include(p => p.SpecialTags).Where(p => p.Id == prodAptObj.ProductId).FirstOrDefault());
             }
+
             return View(ShoppingCartVM);
         }
+
     }
 }
