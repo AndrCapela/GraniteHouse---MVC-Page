@@ -6,6 +6,7 @@
 <form method="post">
     <br /><br />
     <h2 class="text-info">Your Shopping Cart</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
     <br />
     @if (Model.Products.Count > 0)
     {
@@ -127,4 +128,6 @@
             });
         });
     </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
+    }
 }

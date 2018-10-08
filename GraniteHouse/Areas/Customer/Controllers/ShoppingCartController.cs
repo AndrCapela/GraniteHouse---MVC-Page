@@ -47,6 +47,7 @@ namespace GraniteHouse.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult IndexPost()
         {
+
             List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
 
             ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
@@ -73,12 +74,13 @@ namespace GraniteHouse.Areas.Customer.Controllers
             HttpContext.Session.Set("ssShoppingCart", listCartItems);
 
             return RedirectToAction("AppointmentConfirmation", "ShoppingCart", appointmentId);
+
         }
-        
+
         public IActionResult Remove(int id)
         {
             List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
-            if(listCartItems != null && listCartItems.Count > 0)
+            if (listCartItems != null && listCartItems.Count > 0)
             {
                 if (listCartItems.Contains(id))
                 {
@@ -95,7 +97,7 @@ namespace GraniteHouse.Areas.Customer.Controllers
             ShoppingCartVM.Appointments = _db.Appointments.Where(a => a.Id == id).FirstOrDefault();
             List<ProductsSelectedForAppointment> objProdList = _db.ProductsSelectedForAppointment.Where(p => p.AppointmentId == id).ToList();
 
-            foreach(ProductsSelectedForAppointment prodAptObj in objProdList)
+            foreach (ProductsSelectedForAppointment prodAptObj in objProdList)
             {
                 ShoppingCartVM.Products.Add(_db.Products.Include(p => p.ProductTypes).Include(p => p.SpecialTags).Where(p => p.Id == prodAptObj.ProductId).FirstOrDefault());
             }
