@@ -47,34 +47,39 @@ namespace GraniteHouse.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult IndexPost()
         {
-
-            List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
-
-            ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
-                .AddHours(ShoppingCartVM.Appointments.AppointmentTime.Hour)
-                .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
-
-            Appointments appointments = ShoppingCartVM.Appointments;
-            _db.Appointments.Add(appointments);
-            _db.SaveChanges();
-
-            int appointmentId = appointments.Id;
-
-            foreach (int productId in listCartItems)
+            if (ModelState.IsValid)
             {
-                ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
+                List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+
+                ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
+                    .AddHours(ShoppingCartVM.Appointments.AppointmentTime.Hour)
+                    .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
+
+                Appointments appointments = ShoppingCartVM.Appointments;
+                _db.Appointments.Add(appointments);
+                _db.SaveChanges();
+
+                int appointmentId = appointments.Id;
+
+                foreach (int productId in listCartItems)
                 {
-                    AppointmentId = appointments.Id,
-                    ProductId = productId
-                };
-                _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
+                    ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
+                    {
+                        AppointmentId = appointments.Id,
+                        ProductId = productId
+                    };
+                    _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
+                }
+                _db.SaveChanges();
+                listCartItems = new List<int>();
+                HttpContext.Session.Set("ssShoppingCart", listCartItems);
+
+                return RedirectToAction("AppointmentConfirmation", "ShoppingCart", appointmentId);
             }
-            _db.SaveChanges();
-            listCartItems = new List<int>();
-            HttpContext.Session.Set("ssShoppingCart", listCartItems);
-
-            return RedirectToAction("AppointmentConfirmation", "ShoppingCart", appointmentId);
-
+            else
+            {
+                return View(ShoppingCartVM);
+            }
         }
 
         public IActionResult Remove(int id)

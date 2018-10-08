@@ -11,9 +11,10 @@ namespace GraniteHouse.Models
     {
         public int Id { get; set; }
 
-        
+        [Required]
         public DateTime AppointmentDate { get; set; }
 
+        [Required]
         [NotMapped]
         public DateTime AppointmentTime { get; set; }
 
