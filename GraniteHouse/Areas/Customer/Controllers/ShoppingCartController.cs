@@ -55,28 +55,33 @@ namespace GraniteHouse.Areas.Customer.Controllers
                                                             .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
 
             Appointments appointments = ShoppingCartVM.Appointments;
-            _db.Appointments.Add(appointments);
-            _db.SaveChanges();
-
-            int appointmentId = appointments.Id;
-
-            foreach (int productId in lstCartItems)
+            if (ModelState.IsValid)
             {
-                ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
+
+                _db.Appointments.Add(appointments);
+                _db.SaveChanges();
+
+                int appointmentId = appointments.Id;
+
+                foreach (int productId in lstCartItems)
                 {
-                    AppointmentId = appointmentId,
-                    ProductId = productId
-                };
-                _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
+                    ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
+                    {
+                        AppointmentId = appointmentId,
+                        ProductId = productId
+                    };
+                    _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
 
+                }
+                _db.SaveChanges();
+                lstCartItems = new List<int>();
+                HttpContext.Session.Set("ssShoppingCart", lstCartItems);
+
+                return RedirectToAction("AppointmentConfirmation", "ShoppingCart", new { Id = appointmentId });
             }
-            _db.SaveChanges();
-            lstCartItems = new List<int>();
-            HttpContext.Session.Set("ssShoppingCart", lstCartItems);
-
-            return RedirectToAction("AppointmentConfirmation", "ShoppingCart", new { Id = appointmentId });
-
+            return View(appointments);
         }
+
 
         public IActionResult Remove(int id)
         {
